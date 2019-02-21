@@ -8,7 +8,7 @@
 
 This repository contains the documentation for openHAB.
 
-The result is available at [https://www.openhab.org/docs/](https://www.openhab.org/docs/), [https://www.openhab.org/addons/](https://www.openhab.org/addons/) and [http://docs.openhab.org/](http://docs.openhab.org/) [Deprecated]
+The result is available at [https://www.openhab.org/docs/](https://www.openhab.org/docs/) and [https://www.openhab.org/addons/](https://www.openhab.org/addons/).
 
 ## How it works
 
@@ -37,7 +37,7 @@ This is done exactly the same way as for the code repositories, simply through p
 When editing a page through the _"Edit this page on GitHub"_ link on the website, you will be given the opportunity to
 create a pull request directly from GitHub. 
 Please read our [contribution guidelines](CONTRIBUTING.md) and try to follow
-them as bext as you can before submitting a change for review - but don't worry if you don't understand all of them, we
+them as best as you can before submitting a change for review - but don't worry if you don't understand all of them, we
 will help you to get it right.
 
 ## So what are the other branches for?
@@ -59,7 +59,7 @@ So we are saving time for everyone by keeping those files at their original loca
 
 ### How the documentation build works
 
-We have set up our [build server](https://openhab.ci.cloudbees.com/view/Documentation/) to do the magic automatically.
+We have set up our [build server](https://ci.openhab.org/view/Documentation/) to do the magic automatically.
 There are several triggers (mostly time based), which will then *gather the external contents* and move them to our *final* branch.
 You can find this migrated external content in the *final* branch under:
 

@@ -13,7 +13,7 @@ The data may be retrieved at a later time, for example to restore your system af
 openHAB persists Item states in a database, and most popular databases are supported.
 You may have more than one persistence add-on loaded, and each of these may be configured independently.
 
-A complete list of supported persistence add-ons may be found in the [persistence]({/addons/#persistence) section of the on-line openHAB documentation.
+A complete list of supported persistence add-ons may be found in the [persistence](/addons/#persistence) section of the on-line openHAB documentation.
 
 Please refer to the [available persistence service add-on](/addons/#persistence) documentation for your selected persistence add-on for configuration instructions.
 
@@ -168,20 +168,20 @@ You can easily imagine that you can implement very powerful rules using this fea
 
 Here is the full list of available persistence extensions:
 
-| Persistence Extension                   | Description |
-|-----------------------------------------|-------------|
-| `<item>.persist`                        | Persists the current State of the Item |
-| `<item>.lastUpdate`                     | Queries for the last update timestamp of a given Item |
-| `<item>.historicState(AbstractInstant)` | Retrieves the State of an Item at a certain point in time |
-| `<item>.changedSince(AbstractInstant)`  | Checks if the State of the Item has (ever) changed since a certain point in time |
-| `<item>.updatedSince(AbstractInstant)`  | Checks if the state of the Item has been updated since a certain point in time |
-| `<item>.maximumSince(AbstractInstant)`  | Gets the maximum value of the State of a persisted Item since a certain point in time |
-| `<item>.minimumSince(AbstractInstant)`  | Gets the minimum value of the State of a persisted Item since a certain point in time |
-| `<item>.averageSince(AbstractInstant)`  | Gets the average value of the State of a persisted Item since a certain point in time |
-| `<item>.deltaSince(AbstractInstant)`    | Gets the difference in value of the State of a given Item since a certain point in time |
-| `<item>.previousState()`                | Gets the previous State of a persisted Item (returns HistoricItem) |
+| Persistence Extension                   | Description                                                                                                                                                                |
+|-----------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `<item>.persist`                        | Persists the current State of the Item                                                                                                                                     |
+| `<item>.lastUpdate`                     | Queries for the last update timestamp of a given Item                                                                                                                      |
+| `<item>.historicState(AbstractInstant)` | Retrieves the State of an Item at a certain point in time                                                                                                                  |
+| `<item>.changedSince(AbstractInstant)`  | Checks if the State of the Item has (ever) changed since a certain point in time                                                                                           |
+| `<item>.updatedSince(AbstractInstant)`  | Checks if the state of the Item has been updated since a certain point in time                                                                                             |
+| `<item>.maximumSince(AbstractInstant)`  | Gets the maximum value of the State of a persisted Item since a certain point in time                                                                                      |
+| `<item>.minimumSince(AbstractInstant)`  | Gets the minimum value of the State of a persisted Item since a certain point in time                                                                                      |
+| `<item>.averageSince(AbstractInstant)`  | Gets the average value of the State of a persisted Item since a certain point in time                                                                                      |
+| `<item>.deltaSince(AbstractInstant)`    | Gets the difference in value of the State of a given Item since a certain point in time                                                                                    |
+| `<item>.previousState()`                | Gets the previous State of a persisted Item (returns HistoricItem)                                                                                                         |
 | `<item>.previousState(true)`            | Gets the previous State of a persisted Item, skips Items with equal State values and searches the first Item with State not equal the current State (returns HistoricItem) |
-| `<item>.sumSince(AbstractInstant)`      | Gets the sum of the previous States of a persisted Item since a certain point in time |
+| `<item>.sumSince(AbstractInstant)`      | Gets the sum of the previous States of a persisted Item since a certain point in time                                                                                      |
 
 These extensions use the default persistence service.
 (Refer to 'Default Persistence Service' above to configure this.)
@@ -240,18 +240,13 @@ then
 end
 ```
 
-Create a refresh script `$OPENHAB_CONF/rules_refresh.sh` and make it executable (`chmod +x rules_refresh.sh`):
+Create a refresh script `$OPENHAB_CONF/rules/rules_refresh.sh` and make it executable (`chmod +x $OPENHAB_CONF/rules/rules_refresh.sh`):
 
 ```sh
 #!/bin/bash
 #This script is called by openHAB after the persistence service has started
 sleep 5
-cd [full_path_to_openhab_config_directory]/rules
-FileList="$(find *.rules | grep -v refresh.rules)"
-for File in $FileList
-do
-  touch $File
-done
+find "$OPENHAB_CONF/rules" -type f -name '*.rules' -not -name refresh.rules | xargs touch
 ```
 
 The script waits for five seconds and then touches all `*.rules` files (except `refresh.rules`).

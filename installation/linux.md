@@ -27,7 +27,7 @@ Linux file permissions is one of the biggest sources of issues, Linux novices ru
 If you find yourself in a situation, where you have **no write access** to the openHAB configuration or system files wrong permissions and/or the incorrect use of `sudo` are often the cause.
 Train your understanding of Linux permissions at [linuxjourney.com/lesson/file-permissions](https://linuxjourney.com/lesson/file-permissions).
 
-**Meeting the Requirements:**
+## Meeting the Requirements: ##
 As a first step, please verify, that your system meets the [prerequisites](index.html#prerequisites).
 You may want to install Zulu, a fully certified Java build [as a package](http://zulu.org/zuludocs-folder/Content/ZuluUserGuide/PrepareZuluPlatform/AttachAzulPackageRepositories.htm) or [manually](http://zulu.org/zuludocs-folder/Content/ZuluUserGuide/InstallingZulu/InstallLinuxUsingZuluZIPFile.htm).
 
@@ -40,9 +40,19 @@ When installing Zulu or Zulu Embedded from a .zip or .tar archive, make sure to 
 
 ## Installation
 
-openHAB 2 can be installed though a package repository or manually from file.
-The installation through a provided **package repository** (using `apt`, `apt-get`, `yum` or `dnf`) is **recommended** for end users.
+openHAB 2 can be installed through 
+ - the openHABian project **(easiest method, ships with the openHABian configuration tool)**
+ - a package repository (apt, yum)
+ - manually from file.
+ 
+The installation through the **openHABian project** and the use of the provided openHABian configuration tool is recommended for end users. 
+
+Installing using the provided **package repository** (using `apt`, `apt-get`, `yum` or `dnf`) is easier, but requires more manualconfiguration later on due to the missing openHABian configuration tool.
+
 The manual installation through a platform independent archive file is suited for users who know what they are doing.
+
+### openHABian project
+The easy step by step instruction can be found [here]: (openhabian.html).
 
 ### Package Repository Installation
 
@@ -87,7 +97,7 @@ Then, you can choose between, *Official (Stable)*, *Beta* or *Snapshot* builds:
 
 -   **Snapshot Release**
 
-    The snapshot build is created [almost daily](https://openhab.ci.cloudbees.com/job/openhab-linuxpkg/), and include the latest changes to the openHAB 2 core and add-ons.
+    The snapshot build is created [almost daily](https://ci.openhab.org/job/openhab-linuxpkg/), and include the latest changes to the openHAB 2 core and add-ons.
     These changes are often unstable, so you should use this branch only for testing or development purposes.
 
     The snapshot repository is hosted in openHAB's [JFrog Artifactory instance](https://www.jfrog.com/Artifactory).
@@ -154,7 +164,7 @@ You may add all three to the same file, but make sure the desired repo is is set
 
 -   **Snapshot Release**
 
-    The snapshot build is created [almost daily](https://openhab.ci.cloudbees.com/job/openhab-linuxpkg/), and include the latest changes to the openHAB 2 core and add-ons.
+    The snapshot build is created [almost daily](https://ci.openhab.org/job/openhab-linuxpkg/), and include the latest changes to the openHAB 2 core and add-ons.
     These changes are often unstable, so you should use this branch only for testing or development purposes.
 
     ```text
@@ -477,7 +487,6 @@ After=network-online.target
 Type=simple
 User=openhab
 Group=openhab
-GuessMainPID=yes
 WorkingDirectory=/opt/openhab2
 #EnvironmentFile=/etc/default/openhab2
 ExecStart=/opt/openhab2/start.sh server
@@ -512,7 +521,7 @@ The output of `status` after a successful execution should be similar to:
 #### Installing add-ons
 
 When running a manual installation, it is possible to pre-download add-ons or legacy add-ons if you want to install any bindings at a later date without connecting to the internet.
-Simply download the kar files (the latest builds can be found [here](https://openhab.ci.cloudbees.com/job/openHAB-Distribution/)) and move them to the `/opt/openhab2/addons` folder.
+Simply download the kar files (the latest builds can be found [here](https://ci.openhab.org/job/openHAB-Distribution/)) and move them to the `/opt/openhab2/addons` folder.
 
 #### Upgrade
 
@@ -634,7 +643,7 @@ The need for these and the exact implementation on a specific system might diffe
 ### Privileges for Common Peripherals
 
 An openHAB setup will often rely on hardware like a modem, transceiver or adapter to interface with home automation hardware.
-Examples are a Z-Wave, Enocean or RXFcom USB Stick or a Raspberry Pi add-on board connected to the serial port on its GPIOs.
+Examples are a Bluetooth, Z-Wave, Enocean or RXFcom USB Stick or a Raspberry Pi add-on board connected to the serial port on its GPIOs.
 In order to allow openHAB to communicate with additional peripherals, it has to be added to corresponding Linux groups.
 The following example shows how to add Linux user `openhab` to the often needed groups `dialout` and `tty`.
 Additional groups may be needed, depending on your hardware and software setup.
@@ -642,6 +651,7 @@ Additional groups may be needed, depending on your hardware and software setup.
 ```shell
 sudo adduser openhab dialout
 sudo adduser openhab tty
+sudo adduser openhab bluetooth
 ```
 
 If you are looking to enable sound privileges for openHAB, it will also be necessary to add openHAB to the "audio" group.

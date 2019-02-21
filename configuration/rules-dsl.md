@@ -181,10 +181,10 @@ You may also use [CronMaker](http://www.cronmaker.com/) or the generator at [Fre
 
 Two system-based triggers are provided as described in the table below:
 
-| Trigger           |  Description |
-|-------------------|--------------|
+| Trigger           | Description                                                                                                                                                                                        |
+|-------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | System started    | System started is triggered upon openHAB startup, after the rule file containing the System started trigger is modified, or after item(s) related to that rule file are modified in a .items file. |
-| System shuts down | Rules using the 'System shuts down' trigger execute when openHAB shuts down. |
+| System shuts down | Rules using the 'System shuts down' trigger execute when openHAB shuts down.                                                                                                                       |
 
 You may wish to use the 'System started' trigger to initialize values at startup if they are not already set.
 
@@ -244,6 +244,7 @@ Channel "<triggerChannel>" triggered [<triggerEvent>]
 When a binding provides such channels, you can find the needed information in the corresponding binding documentation.
 There is no generic list of possible values for `triggerEvent`,
 The `triggerEvent`(s) available depend upon the specific implementation details of the binding.
+If the Rule needs to know what the received event was, use the [implicit variable]({{base}}/configuration/rules-dsl.html#implicit-variables-inside-the-execution-block) `receivedEvent` to acces the information.
 
 Example:
 
@@ -293,11 +294,15 @@ The following table summarizes the impact of the two manipulator commands on the
 
 | Command \ Rule Trigger   | `received update` | `received command` | `changed` |
 |--------------------------|-------------------|--------------------|-----------|
-| postUpdate               | ⚡ rule fires      | ❌                 | (depends) |
-| sendCommand              | ❌                | ⚡ rule fires       | (depends) |
+| postUpdate               | ⚡ rule fires      | ❌                  | (depends) |
+| sendCommand              | (❌) see below     | ⚡ rule fires       | (depends) |
 | *Change through Binding* | ⚡ rule fires      | ⚡ rule fires       | (depends) |
 
 **Beware:**
+In most cases, a rule with a trigger of `receveived update` will fire following the command `sendCommand` as:
+- openHAB auto-updates the status of Items for which the item definition does not contain `autoupdate="false"`
+- the Thing sends an status update to the Item.
+
 Besides the specific manipulator command methods `MyItem.sendCommand(<new_state>)` and `MyItem.postUpdate(<new_state>)`, generic manipulators in the form of `sendCommand(MyItem, <new_state>)` and `postUpdate(MyItem, <new_state>)` are available. The specific versions is normally recommended.
 
 {: #sendcommand-method-vs-action}
@@ -402,15 +407,15 @@ val newColor = new Color(red, blue, green) // where red, blue, and green are int
 MyColorItem.sendCommand(new HSBType(newColor))
 ```
 
-When individual color values from a HSBType as a PercentType are retrieved, it will be necessary to multiply that PercentType by 255 to obtain a standard 8-bit per color channel RGB. 
-Correspondingly, the for 16 or 32 bit representation, the percent type needs to be multiplied the percent type by 16^2 or 32^2, respectively.
+When individual color values from a HSBType as a PercentType are retrieved, it will be necessary to divide the PercentType by 100 and multiply by 255 to obtain a standard 8-bit per color channel RGB.
+Correspondingly, for the 16 or 32 bit representation, the PercentType needs to divided by 100 and multiplied by 65535 (2 ^ 16 - 1) or 4294967295 (2 ^ 32 - 1), respectively.
 
 ```java
 //Example for conversion to 8-bit representation
 // In rule body
-val red = (MyColorItem.state as HSBType).red * 255
-val green = (MyColorItem.state as HSBType).green * 255
-val blue = (MyColorItem.state as HSBType).blue * 255
+val red = (MyColorItem.state as HSBType).red / 100 * 255
+val green = (MyColorItem.state as HSBType).green / 100 * 255
+val blue = (MyColorItem.state as HSBType).blue / 100 * 255
 ```
 
 ##### Contact Item
@@ -442,7 +447,8 @@ val Number epoch = (MyDateTimeItem.state as DateTimeType).zonedDateTime.timeInMi
 val Number nowEpoch = now.millis
 
 // Convert DateTimeType to Joda DateTime
-val joda = new DateTime((MyDateTimeItem.state as DateTimeType).zonedDateTime.timeInMillis)
+val jodaVariantOne = new DateTime(MyDateTimeItem.state.toString)
+val jodaVariantTwo = new DateTime((MyDateTimeItem.state as DateTimeType).zonedDateTime.toInstant.toEpochMilli)
 
 // Convert Joda DateTime to DateTimeType
 val calendar = java.util.Calendar::getInstance
@@ -585,11 +591,11 @@ To avoid an error mentioning an "Ambiguous Method Call" always cast the state of
 The Player item allows to control players (e.g. audio players) with commands such as Play, Pause, Next, Previous, Rewind and Fastforward.
 The Player Item carries three types with predefined commands 
 
-State Type | Commands
-------------------|------------------
-**PlayPauseType** | PLAY, PAUSE
-**RewindFastforwardType** | REWIND, FASTFORWARD
-**NextPreviousType** | NEXT, PREVIOUS
+| State Type                | Commands            |
+|---------------------------|---------------------|
+| **PlayPauseType**         | PLAY, PAUSE         |
+| **RewindFastforwardType** | REWIND, FASTFORWARD |
+| **NextPreviousType**      | NEXT, PREVIOUS      |
 
 These types can be convert from Open and Closed to 1 and 0 with code similar to the Contact Item (OpenClosedType)
 
@@ -679,6 +685,7 @@ Besides the implicitly available variables for items and commands/states, rules 
 - `receivedCommand` - will be implicitly available in every rule that has at least one command event trigger.
 - `previousState` - will be implicitly available in every rule that has at least one status change event trigger.
 - `triggeringItem` - will be implicitly available in every rule that has at least one command, status update, or status change event trigger.
+- `receivedEvent` - will be implicitly available in every rule that has a channel-based trigger.
 
 {: #return}
 ### Early returns
@@ -838,6 +845,17 @@ when
 then
     if(receivedCommand == ON) Light.sendCommand(ON)
     else Light.sendCommand(OFF)
+end
+
+rule "Start wake up light on sunrise"
+when
+    Channel "astro:sun:home:rise#event" triggered
+then
+    switch(receivedEvent.getEvent()) {
+        case "START": {
+            Light.sendCommand(ON)
+        }
+    }
 end
 ```
 
